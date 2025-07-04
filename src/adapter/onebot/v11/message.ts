@@ -20,6 +20,7 @@ import type {
   ImageContent,
   AudioContent,
   VideoContent,
+  FileContent,
   LinkContent,
   ForwardContent,
   ForwardContentNode,
@@ -45,11 +46,13 @@ export type FaceMessage = Message<
   }
 >
 
-type FileMessage<T extends 'image' | 'record' | 'video', D = StrKeyObject> = Message<
+type FileMessage<T extends 'image' | 'record' | 'video' | 'file' = 'file', D = StrKeyObject> = Message<
   T,
   D & {
     /** 文件名 */
     file: string
+    /** 文件ID */
+    file_id?: string
     /** 文件链接 */
     url?: string
     /** 是否使用已缓存的文件, 默认 true */
@@ -219,6 +222,7 @@ export interface MessageMapping {
   image: ImageMessage
   record: RecordMessage
   video: VideoMessage
+  file: FileMessage
   forward: ForwardMessage
   node: ForwardMessageNode
 }
@@ -343,6 +347,15 @@ const messageBuildStrategy: MessageBuildStrategy<ContentMapping> = {
     const { id, url } = content.data
     return createMessage('video', {
       file: id,
+      url,
+    })
+  },
+
+  file: (content: FileContent): FileMessage => {
+    const { id, url } = content.data
+    return createMessage('file', {
+      file: id,
+      file_id: id,
       url,
     })
   },
